@@ -9,16 +9,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import vttp.ssf_day16.model.Carpark;
 import vttp.ssf_day16.model.Country;
+import vttp.ssf_day16.model.DailyStockData;
 import vttp.ssf_day16.model.Joke;
 import vttp.ssf_day16.model.Student;
 import vttp.ssf_day16.service.StudentService;
 
 @RestController
-@RequestMapping(path = "/api/students", produces = "application/json")
+@RequestMapping(path = "/api", produces = "application/json")
 public class StudentRestController {
     
     @Autowired
@@ -71,6 +73,20 @@ public class StudentRestController {
     //     List<Joke> returnValue = studentService.getJoke();
     //     return ResponseEntity.ok().body(returnValue);
     // }
+
+    @GetMapping("/stock")
+    public ResponseEntity<List<DailyStockData>> stockData(
+                                                            @RequestParam("function") String function, 
+                                                            @RequestParam("symbol") String symbol,
+                                                            @RequestParam("apikey") String apikey){
+        // function=TIME_SERIES_DAILY_ADJUSTED&symbol=IBM&apikey=demo
+        System.out.println(function);
+        System.out.println(symbol);
+        System.out.println(apikey);
+        System.out.println("===================");
+        List<DailyStockData> returnValue = studentService.getAlphavantageData(function, symbol, apikey);
+        return ResponseEntity.ok().body(returnValue);
+    }
 
 
 }

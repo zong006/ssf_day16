@@ -14,6 +14,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import vttp.ssf_day16.model.Carpark;
 import vttp.ssf_day16.model.Country;
+import vttp.ssf_day16.model.DailyStockData;
 import vttp.ssf_day16.model.Joke;
 import vttp.ssf_day16.model.Student;
 import vttp.ssf_day16.repo.StudentRepo;
@@ -109,9 +110,6 @@ public class StudentService {
         JsonArray records = result.getJsonArray("records");
         JsonObject r = records.getJsonObject(0);
 
-        // JsonObjectBuilder carparkBuilder = Json.createObjectBuilder();
-        // carparkBuilder.add("id", );
-        
         List<Carpark> carparks = new ArrayList<>();
         for (int i = 0 ; i < records.size() ; i++){
             Carpark carpark = new Carpark();
@@ -144,6 +142,33 @@ public class StudentService {
     //     }
     //     return jokes;
     // }
+
+    public List<DailyStockData> getAlphavantageData(String function, String symbol, String apikey){
+        String url = "https://www.alphavantage.co/query?"
+                        + "function=" + function
+                        + "symbol=" + symbol
+                        + "apikey=" + apikey;
+        System.out.println(url);
+// function=TIME_SERIES_DAILY_ADJUSTED&symbol=IBM&apikey=demo
+        JsonObject jsonData = generateJson(url);
+
+        System.out.println(jsonData);
+        JsonObject timeSeriesDaily = jsonData.getJsonObject("Time Series (Daily)");
+
+        List<DailyStockData> dailyStockDataList = new ArrayList<>();
+        Set<String> keys = timeSeriesDaily.keySet();
+        for (String key : keys){
+            DailyStockData dailyStockData = new DailyStockData();
+            JsonObject entry = timeSeriesDaily.getJsonObject(key);
+            String dayOpen = entry.getString("1. open");
+            String dayClose = entry.getString("4. close");
+
+            dailyStockData.setDayOpen(dayOpen);
+            dailyStockData.setDayClose(dayClose);
+            dailyStockDataList.add(dailyStockData);
+        }
+        return dailyStockDataList;
+    }
 
     public JsonObject generateJson(String url){
         RestTemplate restTemplate = new RestTemplate();

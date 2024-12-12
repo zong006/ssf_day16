@@ -1,27 +1,39 @@
-FROM maven:3.9.9-eclipse-temurin-23
+# ---------------------------- STAGE 1 ----------------------------
+FROM maven:3.9.9-eclipse-temurin-23 AS compiler
 
 LABEL MAINTAINER="example name"
 LABEL DESCRIPTION="an example description"
 LABEL version="0.0.0"
 LABEL name="example app name"
 
-ARG APP_DIR=/APP
+ARG COMPIILE_DIR=/code_folder
 
-# directory where either source code resides or i copy my project to 
-WORKDIR ${APP_DIR}
+WORKDIR ${COMPIILE_DIR}
 
-# copy required files into the image
 COPY pom.xml .
 COPY mvnw .
 COPY mvnw.cmd .
 COPY src src
 COPY .mvn .mvn 
 
-# package application using RUN directive 
-# downloads dependencies defines in pom.xml. then compile and package as jar
 RUN mvn package -Dmaven.test.skip=true
+
+# ---------------------------- STAGE 1 ----------------------------
+
+# ---------------------------- STAGE 2 ----------------------------
+
+FROM maven:3.9.9-eclipse-temurin-23
+
+ARG DEPLOY_DIR=/app
+
+# directory where either source code resides or i copy my project to 
+WORKDIR ${DEPLOY_DIR}
+COPY --from=compiler /code_folder/target/ssf_day16-0.0.1-SNAPSHOT.jar ssf_day16.jar
+
 
 ENV SERVER_PORT=3000
 EXPOSE ${SERVER_PORT}
 
-ENTRYPOINT java -jar target/ssf_day16-0.0.1-SNAPSHOT.jar
+ENTRYPOINT java -jar target/ssf_day16.jar
+
+# ---------------------------- STAGE 2 ----------------------------
